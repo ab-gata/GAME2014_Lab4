@@ -49,15 +49,13 @@ public class BulletBehaviour : MonoBehaviour
 
     private void CheckBounds() // top bound, lower bound
     {
-        if (transform.position.y < bulletBounds.max)
+        if (transform.position.y < bulletBounds.max) // Player side of screen = Enemy bullet
         {
-            //Destroy(this.gameObject);
-
             bulletManager.ReturnBullet(this.gameObject);
         }
-        else if (transform.position.y > bulletBounds.min)
+        else if (transform.position.y > bulletBounds.min) // Enemy side of screen = Player bullet
         {
-            bulletManager.ReturnBullet(this.gameObject);
+            bulletManager.ReturnBullet(this.gameObject, BulletTypes.PLAYER);
         }
     }
 }

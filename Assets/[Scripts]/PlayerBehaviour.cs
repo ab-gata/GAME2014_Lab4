@@ -10,13 +10,27 @@ public class PlayerBehaviour : MonoBehaviour
     [Range(0.0f, 1.0f)]
     public float decay;
     public Bounds bounds;
-    
+
+    [Header("Bullets")]
+    public Transform bulletSpawn;
+
     private Rigidbody2D rigidbody;
+
+    private BulletManager bulletManager;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
+        bulletManager = GameObject.FindObjectOfType<BulletManager>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            bulletManager.GetBullet(bulletSpawn.position, BulletTypes.PLAYER);
+        }
     }
 
     // Update is called once per frame

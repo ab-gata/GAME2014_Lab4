@@ -6,43 +6,45 @@ using UnityEngine;
 [System.Serializable]
 public class BulletManager : MonoBehaviour
 {
-    public Queue<GameObject> bulletPool;
-    public int bulletNumber;
-    //public GameObject bulletPrefab;
+    // Enemy Bullets
+    public Queue<GameObject> enemyBulletPool;
+    public int enemyBulletCount;
 
+    // Player Bullets
+    public Queue<GameObject> playerBulletPool;
+    public int playerBulletCount;
+
+    // Reference
     private BulletFactory factory;
 
     // Start is called before the first frame update
     void Start()
     {
-        bulletPool = new Queue<GameObject>(); // creates an empty Queue
+        // Bullet Pools
+        enemyBulletPool = new Queue<GameObject>(); // create empty Queues
+        playerBulletPool = new Queue<GameObject>();
+
+        // Reference
         factory = GetComponent<BulletFactory>();
-
-        //BuildBulletPool();
     }
 
-    /// <summary>
-    ///  This method builds a bullet pool of bulletNumber bullets
-    /// </summary>
-    private void BuildBulletPool()
+    private void AddBullet(BulletTypes type = BulletTypes.ENEMY) // Create bullets and add to respective queue
     {
-        for (int i = 0; i < bulletNumber; i++)
+        var temp_bullet = factory.createBullet(type);
+
+        switch (type)
         {
-            AddBullet();
+            case BulletTypes.ENEMY:
+                enemyBulletPool.Enqueue(temp_bullet);
+                enemyBulletCount++;
+                break;
+            case BulletTypes.PLAYER:
+                playerBulletPool.Enqueue(temp_bullet);
+                playerBulletCount++;
+                break;
+            default:
+                break;
         }
-    }
-
-    private void AddBullet()
-    {
-        /*
-        var temp_bullet = Instantiate(bulletPrefab);
-        temp_bullet.SetActive(false);
-        temp_bullet.transform.parent = transform;
-        bulletPool.Enqueue(temp_bullet);
-        */
-
-        var temp_bullet = factory.createBullet();
-        bulletPool.Enqueue(temp_bullet);
     }
 
     // <summary>
@@ -51,27 +53,53 @@ public class BulletManager : MonoBehaviour
     // </summary>
     // <param name="spawnPosition"></param>
     // <returns></returns>
-    public GameObject GetBullet(Vector2 spawnPosition)
+    public GameObject GetBullet(Vector2 spawnPosition, BulletTypes type = BulletTypes.ENEMY)
     {
-        if (bulletPool.Count < 1)
+        GameObject temp_bullet = null;
+
+        switch (type)
         {
-            AddBullet();
-            bulletNumber++;
+            case BulletTypes.ENEMY:
+                if (enemyBulletPool.Count < 1)
+                {
+                    AddBullet(type);
+                }
+                temp_bullet = enemyBulletPool.Dequeue();
+                break;
+            case BulletTypes.PLAYER:
+                if (playerBulletPool.Count < 1)
+                {
+                    AddBullet(type);
+                }
+                temp_bullet = playerBulletPool.Dequeue();
+                break;
+            default:
+                break;
         }
 
-        var temp_bullet = bulletPool.Dequeue();
         temp_bullet.transform.position = spawnPosition;
         temp_bullet.SetActive(true);
         return temp_bullet;
     }
 
-    /// <summary>
-    /// This method returns a bullet back into the bullet pool
-    /// </summary>
-    /// <param name="returnedBullet"></param>
-    public void ReturnBullet(GameObject returnedBullet)
+    // <summary>
+    // This method returns a bullet back into the bullet pool
+    // </summary>
+    // <param name="returnedBullet"></param>
+    public void ReturnBullet(GameObject returnedBullet, BulletTypes type = BulletTypes.ENEMY)
     {
         returnedBullet.SetActive(false);
-        bulletPool.Enqueue(returnedBullet);
+
+        switch (type)
+        {
+            case BulletTypes.ENEMY:
+                enemyBulletPool.Enqueue(returnedBullet);
+                break;
+            case BulletTypes.PLAYER:
+                playerBulletPool.Enqueue(returnedBullet);
+                break;
+            default:
+                break;
+        }
     }
 }
